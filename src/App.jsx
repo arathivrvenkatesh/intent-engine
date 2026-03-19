@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import InputBox from "./components/InputBox";
 import ActionCards from "./components/ActionCards";
 import MapView from "./components/MapView";
 import TaskList from "./components/TaskList";
-import ApiKeyModal from "./components/ApiKeyModal";
 import HistoryPanel from "./components/HistoryPanel";
 import { extractIntent } from "./services/groqService";
-import { loadApiKey, addHistory } from "./services/localStore";
+import { addHistory } from "./services/localStore";
 import "./index.css";
 
 export default function App() {
-  const [apiKey, setApiKey] = useState(() => loadApiKey());
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -24,13 +22,12 @@ export default function App() {
   };
 
   const handleAnalyze = async (message) => {
-    if (!apiKey) return;
     setLoading(true);
     setError(null);
     setResult(null);
     setMapLocation(null);
     try {
-      const data = await extractIntent(message, apiKey);
+      const data = await extractIntent(message);
       setResult(data);
       const firstLocation = data.intents?.find((i) => i.entities?.location)?.entities?.location;
       if (firstLocation) setMapLocation(firstLocation);
@@ -50,8 +47,6 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      {!apiKey && <ApiKeyModal onSaved={setApiKey} />}
-
       {/* Toast */}
       {toast && (
         <div style={{
@@ -104,22 +99,11 @@ export default function App() {
           }}>
             Llama 3.3 70B
           </div>
-          <button
-            onClick={() => { if (confirm("Change API key?")) { localStorage.removeItem("intent_engine_groq_key"); setApiKey(""); } }}
-            style={{
-              background: "none", border: "1px solid var(--border)",
-              color: "var(--text-muted)", borderRadius: "6px",
-              padding: "4px 10px", cursor: "pointer", fontSize: "12px"
-            }}
-          >
-            🔑 Key
-          </button>
         </div>
       </nav>
 
       {/* Main content */}
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 20px" }}>
-
         {/* Page title */}
         <div style={{ marginBottom: "28px" }}>
           <h1 style={{
@@ -129,7 +113,7 @@ export default function App() {
             What do you need to do?
           </h1>
           <p style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
-            Paste any message — chat, email, or note. The AI extracts intent and creates actions automatically.
+            Paste any message — chat, email, or note. AI extracts intent and creates actions automatically.
           </p>
         </div>
 
@@ -155,7 +139,7 @@ export default function App() {
         {/* Loading skeleton */}
         {loading && (
           <div style={{ marginBottom: "24px" }}>
-            {[1,2].map(i => (
+            {[1, 2].map(i => (
               <div key={i} style={{
                 height: "160px", borderRadius: "16px", marginBottom: "12px",
                 background: "linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%)",
@@ -167,8 +151,12 @@ export default function App() {
         )}
 
         {/* Two column layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "20px", alignItems: "start" }}>
-
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 340px",
+          gap: "20px",
+          alignItems: "start"
+        }}>
           {/* Left — results */}
           <div>
             {result && !loading && (
@@ -211,6 +199,12 @@ export default function App() {
         @keyframes slideDown {
           from { transform: translateY(-10px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
+        }
+        @media (max-width: 768px) {
+          div[style*="gridTemplateColumns"] {
+            display: flex !important;
+            flex-direction: column !important;
+          }
         }
       `}</style>
     </div>
