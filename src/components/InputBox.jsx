@@ -25,14 +25,15 @@ export default function InputBox({ onAnalyze, loading }) {
 
   return (
     <div>
-      {/* Textarea */}
+      {/* Textarea wrapper */}
       <div style={{
-        borderRadius: "12px",
-        border: `1.5px solid ${focused ? "var(--accent)" : "var(--border)"}`,
-        background: "var(--surface)",
-        transition: "border-color 0.2s, box-shadow 0.2s",
-        boxShadow: focused ? "0 0 0 3px rgba(124,111,255,0.08)" : "none",
+        borderRadius: "14px",
+        border: `2px solid ${focused ? "var(--accent)" : "var(--border)"}`,
+        background: focused ? "white" : "var(--bg)",
+        transition: "all 0.2s ease",
+        boxShadow: focused ? "0 0 0 4px rgba(79,70,229,0.08)" : "none",
         marginBottom: "14px",
+        overflow: "hidden",
       }}>
         <textarea
           ref={textareaRef}
@@ -41,38 +42,42 @@ export default function InputBox({ onAnalyze, loading }) {
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onKeyDown={handleKey}
-          placeholder={`Paste any message here...\n\ne.g. "Let's meet at 5pm in Indiranagar tomorrow"`}
+          placeholder={"Paste any message here...\n\ne.g. \"Let's meet at 5pm in Indiranagar tomorrow\""}
           rows={5}
           style={{
             width: "100%", background: "transparent",
             border: "none", outline: "none", resize: "none",
             padding: "16px", fontSize: "14px", lineHeight: "1.7",
-            color: "var(--text-primary)", fontFamily: "'Inter', sans-serif",
+            color: "var(--text-primary)",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
             caretColor: "var(--accent)",
           }}
         />
 
         {/* Bottom bar */}
         <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between",
           padding: "10px 16px",
-          borderTop: "1px solid var(--border)",
+          borderTop: `1px solid ${focused ? "var(--border)" : "var(--border)"}`,
+          background: "var(--bg)",
         }}>
           <span style={{
             fontSize: "11px", color: "var(--text-muted)",
-            fontFamily: "'JetBrains Mono'"
+            fontFamily: "'JetBrains Mono'",
           }}>
             {value.length > 0 ? `${value.length} chars · Ctrl+Enter` : "Ctrl+Enter to analyze"}
           </span>
 
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             {value && (
               <button
                 onClick={() => setValue("")}
                 style={{
-                  padding: "6px 14px", borderRadius: "8px", fontSize: "12px",
-                  background: "none", border: "1px solid var(--border)",
+                  padding: "6px 12px", borderRadius: "8px", fontSize: "12px",
+                  background: "white", border: "1px solid var(--border)",
                   color: "var(--text-muted)", cursor: "pointer",
+                  fontFamily: "'Plus Jakarta Sans'",
                 }}
               >
                 Clear
@@ -82,25 +87,33 @@ export default function InputBox({ onAnalyze, loading }) {
               onClick={handleSubmit}
               disabled={!value.trim() || loading}
               style={{
-                padding: "6px 18px", borderRadius: "8px", fontSize: "13px",
-                fontWeight: 600, cursor: !value.trim() || loading ? "not-allowed" : "pointer",
-                background: !value.trim() || loading ? "var(--border)" : "var(--accent)",
+                padding: "8px 20px", borderRadius: "10px",
+                fontSize: "13px", fontWeight: 700,
+                cursor: !value.trim() || loading ? "not-allowed" : "pointer",
+                background: !value.trim() || loading
+                  ? "var(--border)"
+                  : "linear-gradient(135deg, var(--accent), var(--accent-2))",
                 color: !value.trim() || loading ? "var(--text-muted)" : "white",
-                border: "none", display: "flex", alignItems: "center", gap: "6px",
-                fontFamily: "'Syne'", transition: "all 0.15s ease",
+                border: "none",
+                display: "flex", alignItems: "center", gap: "6px",
+                fontFamily: "'Syne'",
+                boxShadow: !value.trim() || loading ? "none" : "0 4px 12px rgba(79,70,229,0.3)",
+                transition: "all 0.2s ease",
               }}
             >
               {loading ? (
                 <>
                   <span style={{
-                    width: "12px", height: "12px", borderRadius: "50%",
-                    border: "2px solid white", borderTopColor: "transparent",
-                    display: "inline-block", animation: "spin 0.7s linear infinite"
+                    width: "14px", height: "14px", borderRadius: "50%",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    borderTopColor: "white",
+                    display: "inline-block",
+                    animation: "spin 0.7s linear infinite",
                   }} />
                   Analyzing...
                 </>
               ) : (
-                <> ⚡ Analyze Intent </>
+                <>⚡ Analyze Intent</>
               )}
             </button>
           </div>
@@ -112,28 +125,32 @@ export default function InputBox({ onAnalyze, loading }) {
         <p style={{
           fontSize: "11px", color: "var(--text-muted)",
           fontFamily: "'JetBrains Mono'", letterSpacing: "0.06em",
-          marginBottom: "8px"
+          marginBottom: "10px", fontWeight: 600,
         }}>
           TRY AN EXAMPLE →
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
           {EXAMPLES.map((ex, i) => (
             <button
               key={i}
               onClick={() => { setValue(ex); textareaRef.current?.focus(); }}
               style={{
-                padding: "5px 12px", borderRadius: "20px", fontSize: "12px",
-                background: "var(--surface)", border: "1px solid var(--border)",
-                color: "var(--text-secondary)", cursor: "pointer",
-                fontFamily: "'Inter'", transition: "all 0.15s ease",
+                padding: "6px 14px", borderRadius: "20px", fontSize: "12px",
+                background: "white", border: "1px solid var(--border)",
+                color: "#6366f1", cursor: "pointer",
+                fontFamily: "'Plus Jakarta Sans'", fontWeight: 500,
+                transition: "all 0.15s ease",
+                boxShadow: "var(--shadow-sm)",
               }}
               onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--accent-dim)";
                 e.currentTarget.style.borderColor = "var(--accent)";
-                e.currentTarget.style.color = "var(--text-primary)";
+                e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
+                e.currentTarget.style.background = "white";
                 e.currentTarget.style.borderColor = "var(--border)";
-                e.currentTarget.style.color = "var(--text-secondary)";
+                e.currentTarget.style.transform = "translateY(0)";
               }}
             >
               {ex.length > 38 ? ex.slice(0, 38) + "…" : ex}
@@ -143,9 +160,7 @@ export default function InputBox({ onAnalyze, loading }) {
       </div>
 
       <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );

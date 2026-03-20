@@ -2,20 +2,20 @@ import { useState } from "react";
 import { addEvent, addTask } from "../services/localStore";
 
 const TYPE_CONFIG = {
-  meeting: { color: "#7c6fff", bg: "rgba(124,111,255,0.08)", label: "MEETING" },
-  task: { color: "#34d399", bg: "rgba(52,211,153,0.08)", label: "TASK" },
-  reminder: { color: "#fbbf24", bg: "rgba(251,191,36,0.08)", label: "REMINDER" },
-  travel: { color: "#f87171", bg: "rgba(248,113,113,0.08)", label: "TRAVEL" },
-  deadline: { color: "#f87171", bg: "rgba(248,113,113,0.08)", label: "DEADLINE" },
-  event: { color: "#7c6fff", bg: "rgba(124,111,255,0.08)", label: "EVENT" },
-  call: { color: "#34d399", bg: "rgba(52,211,153,0.08)", label: "CALL" },
-  unknown: { color: "#9090b0", bg: "rgba(144,144,176,0.08)", label: "UNKNOWN" },
+  meeting: { color: "#4f46e5", bg: "rgba(79,70,229,0.08)", label: "MEETING", border: "rgba(79,70,229,0.2)" },
+  task: { color: "#059669", bg: "rgba(5,150,105,0.08)", label: "TASK", border: "rgba(5,150,105,0.2)" },
+  reminder: { color: "#f59e0b", bg: "rgba(245,158,11,0.08)", label: "REMINDER", border: "rgba(245,158,11,0.2)" },
+  travel: { color: "#ec4899", bg: "rgba(236,72,153,0.08)", label: "TRAVEL", border: "rgba(236,72,153,0.2)" },
+  deadline: { color: "#ef4444", bg: "rgba(239,68,68,0.08)", label: "DEADLINE", border: "rgba(239,68,68,0.2)" },
+  event: { color: "#7c3aed", bg: "rgba(124,58,237,0.08)", label: "EVENT", border: "rgba(124,58,237,0.2)" },
+  call: { color: "#0891b2", bg: "rgba(8,145,178,0.08)", label: "CALL", border: "rgba(8,145,178,0.2)" },
+  unknown: { color: "#6b7280", bg: "rgba(107,114,128,0.08)", label: "UNKNOWN", border: "rgba(107,114,128,0.2)" },
 };
 
 const PRIORITY_CONFIG = {
-  high: { color: "#f87171", bg: "rgba(248,113,113,0.12)" },
-  medium: { color: "#fbbf24", bg: "rgba(251,191,36,0.12)" },
-  low: { color: "#34d399", bg: "rgba(52,211,153,0.12)" },
+  high: { color: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)" },
+  medium: { color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)" },
+  low: { color: "#059669", bg: "rgba(5,150,105,0.08)", border: "rgba(5,150,105,0.2)" },
 };
 
 function EntityChip({ icon, value }) {
@@ -24,61 +24,24 @@ function EntityChip({ icon, value }) {
     <div style={{
       display: "inline-flex", alignItems: "center", gap: "5px",
       padding: "4px 10px", borderRadius: "8px",
-      background: "var(--surface)", border: "1px solid var(--border)",
-      fontSize: "12px", color: "var(--text-secondary)"
+      background: "var(--bg)", border: "1px solid var(--border)",
+      fontSize: "12px", color: "#4b5563",
     }}>
-      <span style={{ fontSize: "11px" }}>{icon}</span>
-      <span style={{ color: "var(--text-primary)" }}>{value}</span>
+      <span>{icon}</span>
+      <span style={{ fontWeight: 500 }}>{value}</span>
     </div>
-  );
-}
-
-function ActionButton({ label, executed, onClick, color }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        width: "100%", textAlign: "left",
-        padding: "10px 14px", borderRadius: "10px",
-        background: executed ? `${color}12` : "var(--surface)",
-        border: `1px solid ${executed ? color : "var(--border)"}`,
-        color: executed ? color : "var(--text-secondary)",
-        fontSize: "13px", cursor: executed ? "default" : "pointer",
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        transition: "all 0.15s ease",
-      }}
-      onMouseEnter={(e) => {
-        if (!executed) {
-          e.currentTarget.style.borderColor = color;
-          e.currentTarget.style.color = "var(--text-primary)";
-          e.currentTarget.style.background = `${color}08`;
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!executed) {
-          e.currentTarget.style.borderColor = "var(--border)";
-          e.currentTarget.style.color = "var(--text-secondary)";
-          e.currentTarget.style.background = "var(--surface)";
-        }
-      }}
-    >
-      <span>{label}</span>
-      <span style={{ fontSize: "11px", opacity: 0.7 }}>
-        {executed ? "✓ Done" : "Execute →"}
-      </span>
-    </button>
   );
 }
 
 function IntentCard({ intent, index, onExecuted, onMapRequest }) {
   const [executed, setExecuted] = useState([]);
+  const [hoveredAction, setHoveredAction] = useState(null);
   const config = TYPE_CONFIG[intent.type] || TYPE_CONFIG.unknown;
   const priorityConfig = PRIORITY_CONFIG[intent.priority] || PRIORITY_CONFIG.medium;
   const pct = Math.round((intent.confidence || 0) * 100);
 
   const executeAction = (action, ai) => {
     if (executed.includes(ai)) return;
-
     if (action.toLowerCase().includes("map") || action.toLowerCase().includes("location") || action.toLowerCase().includes("travel")) {
       if (intent.entities?.location) onMapRequest(intent.entities.location);
     }
@@ -100,50 +63,52 @@ function IntentCard({ intent, index, onExecuted, onMapRequest }) {
 
   return (
     <div style={{
-      background: "var(--card)",
+      background: "white", borderRadius: "20px",
       border: "1px solid var(--border)",
-      borderRadius: "16px",
-      overflow: "hidden",
-      marginBottom: "16px",
-      transition: "border-color 0.2s",
+      boxShadow: "var(--shadow-sm)",
+      overflow: "hidden", marginBottom: "16px",
+      transition: "box-shadow 0.2s, transform 0.2s",
     }}
-      onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--border-hover)"}
-      onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--border)"}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "var(--shadow-md)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "var(--shadow-sm)"; e.currentTarget.style.transform = "translateY(0)"; }}
     >
-      {/* Card top accent bar */}
-      <div style={{ height: "3px", background: config.color, opacity: 0.8 }} />
+      {/* Top color bar */}
+      <div style={{ height: "4px", background: `linear-gradient(90deg, ${config.color}, ${config.color}88)` }} />
 
       <div style={{ padding: "20px" }}>
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "14px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{
-              width: "38px", height: "38px", borderRadius: "10px",
-              background: config.bg, display: "flex",
-              alignItems: "center", justifyContent: "center", fontSize: "20px",
-              border: `1px solid ${config.color}22`,
-              flexShrink: 0,
+              width: "44px", height: "44px", borderRadius: "12px",
+              background: config.bg, border: `1px solid ${config.border}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "22px", flexShrink: 0,
             }}>
               {intent.icon}
             </div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                 <span style={{
-                  fontSize: "10px", fontWeight: 600, letterSpacing: "0.08em",
-                  color: config.color, fontFamily: "'JetBrains Mono'"
+                  fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em",
+                  color: config.color, background: config.bg,
+                  padding: "3px 8px", borderRadius: "6px",
+                  border: `1px solid ${config.border}`,
+                  fontFamily: "'JetBrains Mono'",
                 }}>
                   {config.label}
                 </span>
                 <span style={{
-                  fontSize: "10px", padding: "2px 8px", borderRadius: "6px",
+                  fontSize: "10px", padding: "3px 8px", borderRadius: "6px",
                   background: priorityConfig.bg, color: priorityConfig.color,
-                  fontFamily: "'JetBrains Mono'", letterSpacing: "0.04em"
+                  border: `1px solid ${priorityConfig.border}`,
+                  fontFamily: "'JetBrains Mono'", fontWeight: 600,
                 }}>
                   {intent.priority}
                 </span>
               </div>
               <h3 style={{
-                fontSize: "15px", fontWeight: 600,
+                fontSize: "16px", fontWeight: 700,
                 color: "var(--text-primary)", fontFamily: "'Syne'",
               }}>
                 {intent.title}
@@ -151,28 +116,36 @@ function IntentCard({ intent, index, onExecuted, onMapRequest }) {
             </div>
           </div>
 
-          {/* Confidence badge */}
+          {/* Confidence */}
           <div style={{
-            fontSize: "13px", fontWeight: 600,
-            color: pct >= 80 ? "#34d399" : pct >= 60 ? "#fbbf24" : "#f87171",
-            fontFamily: "'JetBrains Mono'",
-            background: "var(--surface)", border: "1px solid var(--border)",
-            padding: "4px 10px", borderRadius: "8px",
+            textAlign: "center", padding: "8px 12px", borderRadius: "12px",
+            background: pct >= 80 ? "rgba(5,150,105,0.08)" : pct >= 60 ? "rgba(245,158,11,0.08)" : "rgba(239,68,68,0.08)",
+            border: `1px solid ${pct >= 80 ? "rgba(5,150,105,0.2)" : pct >= 60 ? "rgba(245,158,11,0.2)" : "rgba(239,68,68,0.2)"}`,
           }}>
-            {pct}%
+            <div style={{
+              fontSize: "16px", fontWeight: 800,
+              color: pct >= 80 ? "#059669" : pct >= 60 ? "#f59e0b" : "#ef4444",
+              fontFamily: "'Syne'",
+            }}>
+              {pct}%
+            </div>
+            <div style={{ fontSize: "9px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono'" }}>
+              confidence
+            </div>
           </div>
         </div>
 
         {/* Confidence bar */}
-        <div style={{
-          height: "3px", background: "var(--border)",
-          borderRadius: "2px", marginBottom: "14px"
-        }}>
+        <div style={{ height: "6px", background: "var(--bg)", borderRadius: "3px", marginBottom: "14px", overflow: "hidden" }}>
           <div style={{
-            height: "3px", borderRadius: "2px",
+            height: "6px", borderRadius: "3px",
             width: `${pct}%`,
-            background: pct >= 80 ? "#34d399" : pct >= 60 ? "#fbbf24" : "#f87171",
-            transition: "width 0.6s ease",
+            background: pct >= 80
+              ? "linear-gradient(90deg, #059669, #10b981)"
+              : pct >= 60
+              ? "linear-gradient(90deg, #f59e0b, #fcd34d)"
+              : "linear-gradient(90deg, #ef4444, #fca5a5)",
+            transition: "width 0.8s ease",
           }} />
         </div>
 
@@ -189,23 +162,47 @@ function IntentCard({ intent, index, onExecuted, onMapRequest }) {
         {/* Divider */}
         <div style={{ height: "1px", background: "var(--border)", marginBottom: "14px" }} />
 
-        {/* Actions */}
+        {/* Actions label */}
         <p style={{
           fontSize: "10px", color: "var(--text-muted)",
-          fontFamily: "'JetBrains Mono'", letterSpacing: "0.08em",
-          marginBottom: "8px"
+          fontFamily: "'JetBrains Mono'", letterSpacing: "0.1em",
+          marginBottom: "10px", fontWeight: 600,
         }}>
-          ACTIONS
+          SUGGESTED ACTIONS
         </p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+
+        {/* Action buttons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {intent.actions?.map((action, ai) => (
-            <ActionButton
+            <button
               key={ai}
-              label={action}
-              executed={executed.includes(ai)}
               onClick={() => executeAction(action, ai)}
-              color={config.color}
-            />
+              onMouseEnter={() => setHoveredAction(ai)}
+              onMouseLeave={() => setHoveredAction(null)}
+              style={{
+                width: "100%", textAlign: "left",
+                padding: "11px 16px", borderRadius: "12px",
+                background: executed.includes(ai)
+                  ? config.bg
+                  : hoveredAction === ai
+                  ? "var(--bg)"
+                  : "white",
+                border: `1px solid ${executed.includes(ai) ? config.border : hoveredAction === ai ? config.border : "var(--border)"}`,
+                color: executed.includes(ai) ? config.color : "var(--text-primary)",
+                fontSize: "13px", cursor: executed.includes(ai) ? "default" : "pointer",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                transition: "all 0.15s ease", fontWeight: 500,
+              }}
+            >
+              <span>{action}</span>
+              <span style={{
+                fontSize: "11px",
+                color: executed.includes(ai) ? config.color : "var(--text-muted)",
+                fontWeight: 600,
+              }}>
+                {executed.includes(ai) ? "✓ Done" : "Run →"}
+              </span>
+            </button>
           ))}
         </div>
       </div>
@@ -219,25 +216,34 @@ export default function ActionCards({ result, onExecuted, onMapRequest }) {
 
   return (
     <div>
-      {/* Summary */}
+      {/* Summary banner */}
       <div style={{
-        display: "flex", alignItems: "center", gap: "10px",
-        padding: "12px 16px", borderRadius: "12px", marginBottom: "16px",
-        background: "var(--card)", border: "1px solid var(--border)",
+        display: "flex", alignItems: "center", gap: "12px",
+        padding: "14px 18px", borderRadius: "16px", marginBottom: "20px",
+        background: "white", border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-sm)",
       }}>
-        <span style={{ fontSize: "18px" }}>🧠</span>
+        <div style={{
+          width: "38px", height: "38px", borderRadius: "10px",
+          background: "var(--accent-dim)", display: "flex",
+          alignItems: "center", justifyContent: "center", fontSize: "20px",
+          flexShrink: 0,
+        }}>🧠</div>
         <div>
           <p style={{
             fontSize: "10px", color: "var(--text-muted)",
-            fontFamily: "'JetBrains Mono'", letterSpacing: "0.08em", marginBottom: "2px"
+            fontFamily: "'JetBrains Mono'", letterSpacing: "0.1em",
+            marginBottom: "3px", fontWeight: 600,
           }}>
             {intents?.length} INTENT{intents?.length !== 1 ? "S" : ""} DETECTED
           </p>
-          <p style={{ fontSize: "13px", color: "var(--text-primary)" }}>{summary}</p>
+          <p style={{ fontSize: "14px", color: "var(--text-primary)", fontWeight: 600 }}>
+            {summary}
+          </p>
         </div>
       </div>
 
-      {/* Intent cards */}
+      {/* Cards */}
       {intents?.map((intent, i) => (
         <IntentCard
           key={i}

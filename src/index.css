@@ -1,47 +1,52 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f0f13;
-  --surface: #16161d;
-  --card: #1c1c26;
-  --border: #2a2a3a;
-  --border-hover: #3a3a50;
-  --accent: #7c6fff;
-  --accent-dim: rgba(124,111,255,0.12);
-  --green: #34d399;
-  --red: #f87171;
-  --amber: #fbbf24;
-  --text-primary: #f0f0ff;
-  --text-secondary: #9090b0;
-  --text-muted: #50506a;
+  --bg: #f5f3ff;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --border: #e0e7ff;
+  --border-hover: #c7d2fe;
+  --accent: #4f46e5;
+  --accent-2: #7c3aed;
+  --accent-dim: rgba(79,70,229,0.08);
+  --accent-glow: rgba(79,70,229,0.15);
+  --green: #059669;
+  --green-dim: rgba(5,150,105,0.08);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.08);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.08);
+  --pink: #ec4899;
+  --pink-dim: rgba(236,72,153,0.08);
+  --text-primary: #1e1b4b;
+  --text-secondary: #6366f1;
+  --text-muted: #a5b4fc;
+  --shadow-sm: 0 1px 4px rgba(79,70,229,0.08);
+  --shadow-md: 0 4px 16px rgba(79,70,229,0.12);
+  --shadow-lg: 0 8px 32px rgba(79,70,229,0.16);
 }
 
 body {
   background: var(--bg);
   color: var(--text-primary);
-  font-family: "Inter", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-.leaflet-container { background: #0d0d14 !important; }
-.leaflet-tile {
-  filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.85) saturate(0.5);
-}
+.leaflet-container { background: #ede9fe !important; border-radius: 12px; }
+.leaflet-tile { filter: hue-rotate(220deg) saturate(0.6) brightness(1.05); }
 .leaflet-control-attribution { display: none !important; }
 .leaflet-control-zoom a {
-  background: var(--card) !important;
-  color: var(--text-secondary) !important;
+  background: white !important;
+  color: var(--accent) !important;
   border-color: var(--border) !important;
+  font-weight: 700 !important;
 }
