@@ -38,12 +38,14 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
   const [showCalendarForm, setShowCalendarForm] = useState(false);
   const [calendarSaved, setCalendarSaved] = useState(false);
   const [reminderEmail, setReminderEmail] = useState("");
-  const [reminderTime, setReminderTime] = useState(() => {
+  const [reminderDate, setReminderDate] = useState(() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(9, 0, 0, 0);
-    return tomorrow.toISOString().slice(0, 16);
+    return tomorrow.toISOString().slice(0, 10);
   });
+  const [reminderHour, setReminderHour] = useState("9");
+  const [reminderMinute, setReminderMinute] = useState("00");
+  const [reminderAmPm, setReminderAmPm] = useState("AM");
   const [wantReminder, setWantReminder] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -65,6 +67,13 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
 
   const handleSaveToCalendar = async () => {
     setSaving(true);
+
+    // Build proper datetime string from dropdowns
+    let hour24 = parseInt(reminderHour);
+    if (reminderAmPm === "PM" && hour24 !== 12) hour24 += 12;
+    if (reminderAmPm === "AM" && hour24 === 12) hour24 = 0;
+    const reminderTime = `${reminderDate}T${String(hour24).padStart(2, "0")}:${reminderMinute}:00`;
+
     try {
       addEvent({
         title: intent.title,
@@ -96,8 +105,8 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
         if ("Notification" in window) {
           const perm = await Notification.requestPermission();
           if (perm === "granted") {
-            const reminderDate = new Date(reminderTime);
-            const delay = reminderDate.getTime() - Date.now();
+            const rd = new Date(reminderTime);
+            const delay = rd.getTime() - Date.now();
             if (delay > 0) {
               setTimeout(() => {
                 new Notification("⏰ Intent Engine Reminder", {
@@ -118,6 +127,13 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const selectStyle = {
+    padding: "10px 8px", borderRadius: "10px",
+    border: "1px solid #FFD4C2", background: "white",
+    fontSize: "13px", color: "#3D1A0A", outline: "none",
+    fontFamily: "'Plus Jakarta Sans'", cursor: "pointer",
   };
 
   return (
@@ -283,12 +299,13 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
               </div>
               <div>
                 <p style={{ fontSize: "13px", fontWeight: 600, color: "#3D1A0A" }}>⏰ Send me an email reminder</p>
-                <p style={{ fontSize: "11px", color: "#C4826A" }}>Email will be sent at exactly the time you choose</p>
+                <p style={{ fontSize: "11px", color: "#C4826A" }}>Email sent at exactly the time you choose</p>
               </div>
             </div>
 
             {wantReminder && (
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
+                {/* Email */}
                 <div>
                   <label style={{ fontSize: "11px", color: "#C4826A", fontWeight: 600, display: "block", marginBottom: "4px", fontFamily: "'JetBrains Mono'", letterSpacing: "0.06em" }}>
                     YOUR EMAIL
@@ -308,14 +325,16 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
                     onBlur={(e) => e.target.style.borderColor = "#FFD4C2"}
                   />
                 </div>
+
+                {/* Date */}
                 <div>
                   <label style={{ fontSize: "11px", color: "#C4826A", fontWeight: 600, display: "block", marginBottom: "4px", fontFamily: "'JetBrains Mono'", letterSpacing: "0.06em" }}>
-                    SEND REMINDER EMAIL AT
+                    REMINDER DATE
                   </label>
                   <input
-                    type="datetime-local"
-                    value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
+                    type="date"
+                    value={reminderDate}
+                    onChange={(e) => setReminderDate(e.target.value)}
                     style={{
                       width: "100%", padding: "10px 14px", borderRadius: "10px",
                       border: "1px solid #FFD4C2", background: "white",
@@ -326,12 +345,49 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
                     onBlur={(e) => e.target.style.borderColor = "#FFD4C2"}
                   />
                 </div>
+
+                {/* Time — Hour, Minute, AM/PM */}
+                <div>
+                  <label style={{ fontSize: "11px", color: "#C4826A", fontWeight: 600, display: "block", marginBottom: "4px", fontFamily: "'JetBrains Mono'", letterSpacing: "0.06em" }}>
+                    REMINDER TIME
+                  </label>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <select
+                      value={reminderHour}
+                      onChange={(e) => setReminderHour(e.target.value)}
+                      style={{ ...selectStyle, flex: 1 }}
+                    >
+                      {[1,2,3,4,5,6,7,8,9,10,11,12].map(h => (
+                        <option key={h} value={String(h)}>{h}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={reminderMinute}
+                      onChange={(e) => setReminderMinute(e.target.value)}
+                      style={{ ...selectStyle, flex: 1 }}
+                    >
+                      {["00","15","30","45"].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={reminderAmPm}
+                      onChange={(e) => setReminderAmPm(e.target.value)}
+                      style={{ ...selectStyle, flex: 1 }}
+                    >
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Preview */}
                 <div style={{
                   padding: "10px 14px", borderRadius: "10px",
                   background: "rgba(255,160,122,0.08)", border: "1px solid #FFD4C2",
                   fontSize: "12px", color: "#C4826A",
                 }}>
-                  📧 Email will be sent to <strong>{reminderEmail || "your email"}</strong> at exactly <strong>{reminderTime ? new Date(reminderTime).toLocaleString() : "the time you set"}</strong>
+                  📧 Email → <strong>{reminderEmail || "your email"}</strong> on <strong>{reminderDate}</strong> at <strong>{reminderHour}:{reminderMinute} {reminderAmPm}</strong>
                 </div>
               </div>
             )}
@@ -339,14 +395,14 @@ function IntentCard({ intent, onExecuted, onMapRequest }) {
             <div style={{ display: "flex", gap: "8px" }}>
               <button
                 onClick={handleSaveToCalendar}
-                disabled={saving || (wantReminder && (!reminderEmail || !reminderTime))}
+                disabled={saving || (wantReminder && (!reminderEmail || !reminderDate))}
                 style={{
                   flex: 1, padding: "11px", borderRadius: "10px",
-                  background: saving || (wantReminder && (!reminderEmail || !reminderTime))
+                  background: saving || (wantReminder && (!reminderEmail || !reminderDate))
                     ? "#FFE8DC"
                     : "linear-gradient(135deg, #FFA07A, #FF6B35)",
                   border: "none",
-                  color: saving || (wantReminder && (!reminderEmail || !reminderTime)) ? "#C4826A" : "white",
+                  color: saving || (wantReminder && (!reminderEmail || !reminderDate)) ? "#C4826A" : "white",
                   fontSize: "13px", fontWeight: 700, cursor: "pointer",
                   fontFamily: "'Syne'",
                 }}
